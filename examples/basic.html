@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendar</title>
+</head>
+<body>
+
+<div id="controller" style="width: 100%;">
+    <div id="data-picker"></div>
+</div>
+<div id="chart1" style="width: 100%;">
+</div>
+<div id="legend"></div>
+
+
+</body>
+<script src="../node_modules/d3v4/build/d3.js"></script>
+<script src="../dist/d3-calendar.js"></script>
+<script>
+    (function () {
+        let chart = d3.calendar()
+            .mondayWeek(true);
+
+        let formatYear = d3.timeFormat("%Y-%m-%d");
+        let byDay = d3.nest()
+            .key(function (d) {
+                return formatYear(d);
+            })
+            .rollup(function () {
+                return Math.round(d3.randomUniform(0,5)()) || NaN;
+            })
+            .object(d3.timeDays(new Date("2017"),new Date("2018")) );
+
+        d3.select('#chart1')
+            .datum(byDay)
+            .call(chart);
+
+    })();
+</script>
+</html>
