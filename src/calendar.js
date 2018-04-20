@@ -1,9 +1,12 @@
 export default function() {
 
     let mondayWeek = true;
+    let weeklySummary = false;
+
     let width = 960,
         height = 136,
-        cellSize = 17;
+        cellSize = 17,
+        summaryMargin = 4;
 
     let color = d3.scaleQuantize()
         .domain([0, 5])
@@ -39,12 +42,24 @@ export default function() {
                 return timeParser(d).getFullYear();
             });
 
+            let byWeek = d3.nest()
+                .key(function (d) {
+                    return new Date(d).getFullYear();
+                })
+                .key(function (d) {
+                    return getWeek(new Date(d));
+                })
+                .rollup(function (l) {
+                    return d3.mean(l,function(e){ return data[e]})
+                })
+                .object(d3.keys(data));
+
             let svgChart = d3.select(this)
                 .selectAll("svg")
                 .data(d3.range(yExtent[0], yExtent[1]+1))
                 .enter().append("svg")
                 .attr("width", width)
-                .attr("height", height)
+                .attr("height", height + (weeklySummary ? cellSize + summaryMargin : 0))
                 .append("g")
                 .attr("transform", "translate(" + ((width - cellSize * 53) / 2) + "," + (height - cellSize * 7 - 1) + ")");
 
@@ -66,6 +81,21 @@ export default function() {
                 .attr("x", function(d) { return getWeek(d) * cellSize; })
                 .attr("y", function(d) { return getDay(d) * cellSize; })
                 .datum(timeFormatter);
+
+            let weekCard = null;
+            if (weeklySummary)
+            {
+                weekCard = svgChart.append("g")
+                    .attr("fill", "#fff8")
+                    .attr("stroke", "#ccc")
+                    .selectAll("rect")
+                    .data(function(d) { return d3.timeWeeks(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+                    .enter().append("rect")
+                    .attr("width", cellSize)
+                    .attr("height", cellSize)
+                    .attr("x", function(d) { return getWeek(d) * cellSize; })
+                    .attr("y", function(d) { return 7 * cellSize + summaryMargin; });
+            }
 
             svgChart.append("g")
                 .attr("fill", "none")
@@ -89,6 +119,28 @@ export default function() {
                     .attr("fill", function(d) { return color(data[d]);})
                     .append("title")
                     .text(function(d) { return d + ": " + JSON.stringify(data[d]); });
+
+                if (weekCard)
+                {
+                    weekCard
+                        .filter(function(d) {
+                            let y = new Date(d).getFullYear(),
+                                w = getWeek(d);
+                            return y in byWeek && !isNaN(byWeek[y][w]);
+                        })
+                        .attr("fill", function(d) {
+                            let y = new Date(d).getFullYear(),
+                                w = getWeek(d);
+                            return color(byWeek[y][w]);})
+                        .append("title")
+                        .text(function(d) {
+                            let y = new Date(d).getFullYear(),
+                                w = getWeek(d);
+                            return "Week " + w + ": " + JSON.stringify(byWeek[y][w]);
+                        });
+                }
+
+
 
             }
 
@@ -126,6 +178,12 @@ export default function() {
         });
 
     }
+
+    calendar.weeklySummary = function(value) {
+        if (!arguments.length) return weeklySummary;
+        weeklySummary = value;
+        return calendar;
+    };
 
     calendar.mondayWeek = function(value) {
         if (!arguments.length) return mondayWeek;
