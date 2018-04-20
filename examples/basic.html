@@ -19,19 +19,28 @@
 <script src="../dist/d3-calendar.js"></script>
 <script>
     (function () {
-        let chart = d3.calendar()
-            .mondayWeek(true);
-
+        // generate a set of random values and nest it by date
         let formatYear = d3.timeFormat("%Y-%m-%d");
         let byDay = d3.nest()
-            .key(function (d) {
-                return formatYear(d);
-            })
+            .key(function (d) { return formatYear(d); })
             .rollup(function () {
                 return Math.round(d3.randomUniform(0,5)()) || NaN;
             })
-            .object(d3.timeDays(new Date("2017"),new Date("2018")) );
+            .object(d3.timeDays(new Date(2017,0,1),new Date()) );
+        console.log("byDay: ",byDay);
 
+        // change the chart's color scale
+        let color = d3.scaleQuantize()
+            .domain([0, 5])
+            .range(["#a50026", "#f46d43", "#fee08b", "#d9ef8b", "#66bd63", "#006837"]);
+
+        // define the calendar chart
+        let chart = d3.calendar()
+            .color(color)
+            .weeklySummary(true)
+            .mondayWeek(true);
+
+        // generate the chart from the dataset in the selected element
         d3.select('#chart1')
             .datum(byDay)
             .call(chart);
