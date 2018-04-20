@@ -27,7 +27,7 @@
     "url": "https://github.com/vanch3d/d3-calendar.git"
   },
   "scripts": {
-    "prenptest": "rimraf dist && mkdirp dist && rollup -f umd -n d3 -o dist/d3-calendar.js -- index.js",
+    "prenptest": "rimraf dist && mkdirp dist && rollup -c",
     "test": "tape test/**/*-test.js",
     "prepublish": "npm run test && uglifyjs dist/d3-calendar.js -c -m -o dist/d3-calendar.min.js",
     "postpublish": "preamble"
