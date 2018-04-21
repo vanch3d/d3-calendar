@@ -3,6 +3,13 @@ export default function() {
     let mondayWeek = true;
     let weeklySummary = false;
 
+    let defaultLabels = {
+        day: ["M","T","W","T","F","S","S"],
+        year: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+        legend: ["Low","High"]
+    };
+    let labels = Object.assign({},defaultLabels);
+
     let width = 960,
         height = 136,
         cellSize = 17,
@@ -165,14 +172,14 @@ export default function() {
                     .attr("fill", "#000")
                     .attr('x', legendX - 35)
                     .attr('y',legendY + 10)
-                    .text('Low');
+                    .text(labels.legend[0]);
 
                 svgLegend.append('text')
                     .attr('class','label-legend')
                     .attr("fill", "#000")
                     .attr('x', legendX + color.range().length*13+5)
                     .attr('y',legendY + 10)
-                    .text('High');
+                    .text(labels.legend[1]);
             }
 
         });
@@ -212,6 +219,12 @@ export default function() {
     calendar.color = function(value) {
         if (!arguments.length) return color;
         color = value;
+        return calendar;
+    };
+
+    calendar.labels = function(value) {
+        if (!arguments.length) return labels;
+        labels = Object.assign({},defaultLabels,value);
         return calendar;
     };
 
