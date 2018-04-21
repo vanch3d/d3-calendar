@@ -13,7 +13,8 @@ export default function() {
     let width = 960,
         height = 136,
         cellSize = 17,
-        summaryMargin = 4;
+        summaryMargin = 4,
+        paddingBottom = 20;
 
     let color = d3.scaleQuantize()
         .domain([0, 5])
@@ -75,7 +76,7 @@ export default function() {
                 .attr("font-family", "sans-serif")
                 .attr("font-size", "14")
                 .attr("width", width)
-                .attr("height", height + (weeklySummary ? cellSize + summaryMargin : 0))
+                .attr("height", height + (weeklySummary ? cellSize + summaryMargin : 0)  + paddingBottom)
                 .append("g")
                 .attr("transform", "translate(" + (((width - cellSize * 53) / 2)+ 20) + "," + (height - cellSize * 7 - 1) + ")");
 
@@ -99,7 +100,6 @@ export default function() {
                 .style('text-anchor', 'middle')
                 .attr('dy', '-.25em')
                 .text(function (d) { return d; });
-
 
             let svgCard = svgChart.append("g")
                 .attr("fill", "#fff8")
@@ -128,18 +128,30 @@ export default function() {
                     .attr("y", function(d) { return 7 * cellSize + summaryMargin; });
             }
 
-            svgChart.append("g")
-                .attr("fill", "none")
-                .attr("stroke", "#000")
+            let gMonth = svgChart.append("g")
                 .selectAll("path")
                 .data(function(d) { return d3.timeMonths(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
-                .enter().append("path")
+                .enter();
+
+            gMonth.append("path")
+                .attr("fill", "none")
+                .attr("stroke", "#000")
                 .attr("d", pathMonth);
+
+            gMonth.append('text')
+                .attr('class', 'label-month')
+                .style('text-anchor', 'end')
+                .attr("fill","#aaa")
+                .attr("y", -5)
+                .attr("x",function(d){ return (+getWeek(d) + 3) * cellSize; })
+                .text(function (d,i) { return labels.year[i]; });
 
             let svgLegend = d3.select("#legend")
                 .append("svg")
                 .attr("width", width)
                 .attr("height", 40)
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "14")
                 .append("g");
 
             updateHeatMap();
