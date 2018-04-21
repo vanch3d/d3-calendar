@@ -31,6 +31,13 @@ export default function() {
         return ft(d);
     };
 
+    let getWeekDays = function(){
+        let ret = labels.day.slice();
+        if (!mondayWeek)
+            ret.unshift(ret.pop());
+        return ret;
+    };
+
     function calendar(selection){
 
         function pathMonth(t0) {
@@ -65,17 +72,34 @@ export default function() {
                 .selectAll("svg")
                 .data(d3.range(yExtent[0], yExtent[1]+1))
                 .enter().append("svg")
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "14")
                 .attr("width", width)
                 .attr("height", height + (weeklySummary ? cellSize + summaryMargin : 0))
                 .append("g")
-                .attr("transform", "translate(" + ((width - cellSize * 53) / 2) + "," + (height - cellSize * 7 - 1) + ")");
+                .attr("transform", "translate(" + (((width - cellSize * 53) / 2)+ 20) + "," + (height - cellSize * 7 - 1) + ")");
 
             svgChart.append("text")
-                .attr("transform", "translate(-6," + cellSize * 3.5 + ")rotate(-90)")
+                .attr("transform", "translate(-26," + cellSize * 3.5 + ")rotate(-90)")
                 .attr('class','label-year')
                 .attr("fill", "#000")
                 .attr("text-anchor", "middle")
                 .text(function(d) { return d; });
+
+            // @todo[vanch3d] move all text labels into the same g
+            svgChart.selectAll('label-day')
+                .data(getWeekDays())
+                .enter().append('g')
+                .attr('transform', function (d, i) {
+                    return 'translate(-10,' + cellSize*(i+1) + ')';
+                })
+                .append('text')
+                .attr('class', 'label-day')
+                .attr("fill","#aaa")
+                .style('text-anchor', 'middle')
+                .attr('dy', '-.25em')
+                .text(function (d) { return d; });
+
 
             let svgCard = svgChart.append("g")
                 .attr("fill", "#fff8")
