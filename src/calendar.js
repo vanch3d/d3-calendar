@@ -1,13 +1,31 @@
 export default function() {
 
+    /**
+     * Specify whether the week start on Monday (true) or on Sunday (false)
+     * @type {boolean}
+     */
     let mondayWeek = true;
+
+    /**
+     * Specify whether the weekly summary is displayed on the chart
+     * @type {boolean}
+     */
     let weeklySummary = false;
 
+    /**
+     * The default labels for the different elements of the chart
+     * @type {{day: string[], year: string[], legend: string[]}}
+     */
     let defaultLabels = {
         day: ["M","T","W","T","F","S","S"],
         year: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
         legend: ["Low","High"]
     };
+
+    /**
+     * The current labels
+     * @type {{day: string[], year: string[], legend: string[]}}
+     */
     let labels = Object.assign({},defaultLabels);
 
     let width = 960,
@@ -16,6 +34,9 @@ export default function() {
         summaryMargin = 4,
         paddingBottom = 20;
 
+    /**
+     * The default color scale used for the chart
+     */
     let color = d3.scaleQuantize()
         .domain([0, 5])
         .range(["#a50026", "#d73027", "#f46d43", "#fdae61", "#fee08b", "#ffffbf", "#d9ef8b", "#a6d96a", "#66bd63", "#1a9850", "#006837"]);
@@ -23,15 +44,29 @@ export default function() {
     let timeFormatter = d3.timeFormat("%Y-%m-%d");
     let timeParser = d3.timeParse("%Y-%m-%d");
 
+    /**
+     * Return the week day of a given date, taking into account Monday/Sunday start
+     * @param {Date} d
+     * @return {number}
+     */
     let getDay = function(d) {
         return (mondayWeek)? (d.getDay() + 6) % 7 : d.getDay();
     };
 
+    /**
+     * Return the week number of a given date, taking into account Monday/Sunday start
+     * @param {Date} d
+     * @return {string}
+     */
     let getWeek = function(d) {
         let ft = (mondayWeek)? d3.timeFormat("%W") : d3.timeFormat("%U");
         return ft(d);
     };
 
+    /**
+     * Return a list of day's label, taking into account Monday/Sunday start
+     * @return {string[]}
+     */
     let getWeekDays = function(){
         let ret = labels.day.slice();
         if (!mondayWeek)
@@ -39,8 +74,17 @@ export default function() {
         return ret;
     };
 
+    /**
+     * Generate the calendar chart and insert it into the DOM selection
+     * @param selection
+     */
     function calendar(selection){
 
+        /**
+         * Generate the border in the chart of a month defined by a specific date
+         * @param {Date} t0
+         * @return {string} The SVG path instruction
+         */
         function pathMonth(t0) {
             let t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
                 d0 = +getDay(t0), w0 = +getWeek(t0),
@@ -57,6 +101,7 @@ export default function() {
                 return timeParser(d).getFullYear();
             });
 
+            // build a summary of the data nested by year & week
             let byWeek = d3.nest()
                 .key(function (d) {
                     return new Date(d).getFullYear();
@@ -69,6 +114,7 @@ export default function() {
                 })
                 .object(d3.keys(data));
 
+            // create the main chart for each year in the data
             let svgChart = d3.select(this)
                 .selectAll("svg")
                 .data(d3.range(yExtent[0], yExtent[1]+1))
@@ -80,6 +126,7 @@ export default function() {
                 .append("g")
                 .attr("transform", "translate(" + (((width - cellSize * 53) / 2)+ 20) + "," + (height - cellSize * 7 - 1) + ")");
 
+            // create the year labels
             svgChart.append("text")
                 .attr("transform", "translate(-26," + cellSize * 3.5 + ")rotate(-90)")
                 .attr('class','label-year')
@@ -87,6 +134,7 @@ export default function() {
                 .attr("text-anchor", "middle")
                 .text(function(d) { return d; });
 
+            // create the day labels
             // @todo[vanch3d] move all text labels into the same g
             svgChart.selectAll('label-day')
                 .data(getWeekDays())
@@ -101,6 +149,7 @@ export default function() {
                 .attr('dy', '-.25em')
                 .text(function (d) { return d; });
 
+            // create the 'card' for each day in the calendar
             let svgCard = svgChart.append("g")
                 .attr("fill", "#fff8")
                 .attr("stroke", "#ccc")
@@ -116,6 +165,7 @@ export default function() {
             let weekCard = null;
             if (weeklySummary)
             {
+                // create the weekly summary row of 'cards' for each week
                 weekCard = svgChart.append("g")
                     .attr("fill", "#fff8")
                     .attr("stroke", "#ccc")
@@ -128,16 +178,19 @@ export default function() {
                     .attr("y", function(d) { return 7 * cellSize + summaryMargin; });
             }
 
+            // create a group for each month in the calendar
             let gMonth = svgChart.append("g")
                 .selectAll("path")
                 .data(function(d) { return d3.timeMonths(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
                 .enter();
 
+            // create a border for the months
             gMonth.append("path")
                 .attr("fill", "none")
                 .attr("stroke", "#000")
                 .attr("d", pathMonth);
 
+            // create the month labela
             gMonth.append('text')
                 .attr('class', 'label-month')
                 .style('text-anchor', 'end')
@@ -146,6 +199,8 @@ export default function() {
                 .attr("x",function(d){ return (+getWeek(d) + 3) * cellSize; })
                 .text(function (d,i) { return labels.year[i]; });
 
+            // create a group for the legend widget
+            // @todo[vanch3d] the DOM selector needs to be customisable
             let svgLegend = d3.select("#legend")
                 .append("svg")
                 .attr("width", width)
@@ -157,6 +212,9 @@ export default function() {
             updateHeatMap();
             updateLegend();
 
+            /**
+             * Update the content of the calendar heatmap based on the data
+             */
             function updateHeatMap(){
                 svgCard.filter(function(d) { return d in data && !isNaN(data[d]); })
                     .attr("fill", function(d) { return color(data[d]);})
@@ -187,6 +245,9 @@ export default function() {
 
             }
 
+            /**
+             * Update the content of the legend based on the data range
+             */
             function updateLegend(){
                 let legendX = 50; //x Position for legend
                 let legendY = 10; //y position for legend
@@ -222,42 +283,77 @@ export default function() {
 
     }
 
+    /**
+     * Set/Get whether the weekly summary is generated
+     * @param {boolean} value
+     * @return {*}
+     */
     calendar.weeklySummary = function(value) {
         if (!arguments.length) return weeklySummary;
         weeklySummary = value;
         return calendar;
     };
 
+    /**
+     * Set/Get whether the week starts on a Monday or Sunday
+     * @param {boolean} value
+     * @return {*}
+     */
     calendar.mondayWeek = function(value) {
         if (!arguments.length) return mondayWeek;
         mondayWeek = value;
         return calendar;
     };
 
+    /**
+     * Set/Get the width of the chart
+     * @param {number} value
+     * @return {*}
+     */
     calendar.width = function(value) {
         if (!arguments.length) return width;
         width = value;
         return calendar;
     };
 
+    /**
+     * Set/Get the height of the chart
+     * @param {number} value
+     * @return {*}
+     */
     calendar.height = function(value) {
         if (!arguments.length) return height;
         height = value;
         return calendar;
     };
 
+    /**
+     * Set/Get the dimension of each day 'card'
+     * @param {number} value
+     * @return {*}
+     */
     calendar.cellSize = function(value) {
         if (!arguments.length) return cellSize;
         cellSize = value;
         return calendar;
     };
 
+    /**
+     * Set/Get the color scale for the chart
+     * @param {d3.scaleQuantize} value
+     * @return {*}
+     */
     calendar.color = function(value) {
         if (!arguments.length) return color;
         color = value;
         return calendar;
     };
 
+    /**
+     * Set/Get the labels for the different elements of the chart
+     * @param {Object} value
+     * @return {*}
+     */
     calendar.labels = function(value) {
         if (!arguments.length) return labels;
         labels = Object.assign({},defaultLabels,value);
