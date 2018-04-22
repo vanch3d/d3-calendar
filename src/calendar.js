@@ -14,17 +14,17 @@ export default function() {
 
     /**
      * The default labels for the different elements of the chart
-     * @type {{day: string[], year: string[], legend: string[]}}
+     * @type {{day: string[], month: string[], legend: string[]}}
      */
     let defaultLabels = {
         day: ["M","T","W","T","F","S","S"],
-        year: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+        month: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
         legend: ["Low","High"]
     };
 
     /**
      * The current labels
-     * @type {{day: string[], year: string[], legend: string[]}}
+     * @type {{day: string[], month: string[], legend: string[]}}
      */
     let labels = Object.assign({},defaultLabels);
 
@@ -190,14 +190,14 @@ export default function() {
                 .attr("stroke", "#000")
                 .attr("d", pathMonth);
 
-            // create the month labela
+            // create the month labels
             gMonth.append('text')
                 .attr('class', 'label-month')
                 .style('text-anchor', 'end')
                 .attr("fill","#aaa")
                 .attr("y", -5)
                 .attr("x",function(d){ return (+getWeek(d) + 3) * cellSize; })
-                .text(function (d,i) { return labels.year[i]; });
+                .text(function (d,i) { return labels.month[i] });
 
             // create a group for the legend widget
             // @todo[vanch3d] the DOM selector needs to be customisable
