@@ -27,10 +27,10 @@
     "url": "https://github.com/vanch3d/d3-calendar.git"
   },
   "scripts": {
-    "prenptest": "rimraf dist && mkdirp dist && rollup -c",
-    "test": "tape test/**/*-test.js",
+    "pretest": "rimraf dist && mkdirp dist && rollup -c",
+    "test": "tape test/**/*-test.js && eslint index.js src",
     "prepublish": "npm run test && uglifyjs dist/d3-calendar.js -c -m -o dist/d3-calendar.min.js",
-    "postpublish": "preamble"
+    "postpublish": ""
   },
   "devDependencies": {
     "eslint": "^4.19.1",
@@ -38,6 +38,7 @@
     "package-preamble": "^0.1.0",
     "rimraf": "^2.6.2",
     "rollup": "^0.58.1",
+    "rollup-plugin-node-resolve": "^3.3.0",
     "tape": "^4.9.0",
     "uglify-js-es6": "^2.8.9"
   },
