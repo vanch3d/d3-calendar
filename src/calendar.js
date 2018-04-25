@@ -199,18 +199,8 @@ export default function() {
                 .attr("x",function(d){ return (+getWeek(d) + 3) * cellSize; })
                 .text(function (d,i) { return labels.month[i] });
 
-            // create a group for the legend widget
-            // @todo[vanch3d] the DOM selector needs to be customisable
-            let svgLegend = d3.select("#legend")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", 40)
-                .attr("font-family", "sans-serif")
-                .attr("font-size", "14")
-                .append("g");
 
             updateHeatMap();
-            updateLegend();
 
             /**
              * Update the content of the calendar heatmap based on the data
@@ -237,7 +227,7 @@ export default function() {
                         .text(function(d) {
                             let y = new Date(d).getFullYear(),
                                 w = getWeek(d);
-                            return "Week " + w + ": " + JSON.stringify(byWeek[y][w]);
+                            return "Week " + w + ": " + (byWeek[y][w]).toFixed(2);
                         });
                 }
 
@@ -245,41 +235,54 @@ export default function() {
 
             }
 
-            /**
-             * Update the content of the legend based on the data range
-             */
-            function updateLegend(){
-                let legendX = 50; //x Position for legend
-                let legendY = 10; //y position for legend
-
-                svgLegend.selectAll('legend').remove();
-                svgLegend.selectAll('legend')
-                    .data(color.range())
-                    .enter()
-                    .append('rect')
-                    .attr('width',11)
-                    .attr('height',11)
-                    .attr('x',function(d,i){ return legendX + i*13; })
-                    .attr('y',legendY)
-                    //.attr('title',function(d,i) {console.log(d,i);return "";})
-                    .attr('fill',function(d){ return d; });
-
-                svgLegend.append('text')
-                    .attr('class','label-legend')
-                    .attr("fill", "#000")
-                    .attr('x', legendX - 35)
-                    .attr('y',legendY + 10)
-                    .text(labels.legend[0]);
-
-                svgLegend.append('text')
-                    .attr('class','label-legend')
-                    .attr("fill", "#000")
-                    .attr('x', legendX + color.range().length*13+5)
-                    .attr('y',legendY + 10)
-                    .text(labels.legend[1]);
-            }
 
         });
+
+        // create a group for the legend widget
+        // @todo[vanch3d] the DOM selector needs to be customisable
+        let svgLegend = d3.select("#legend")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", 40)
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "14")
+            .append("g");
+
+        updateLegend();
+
+        /**
+         * Update the content of the legend based on the data range
+         */
+        function updateLegend(){
+            let legendX = 50; //x Position for legend
+            let legendY = 10; //y position for legend
+
+            svgLegend.selectAll('legend').remove();
+            svgLegend.selectAll('legend')
+                .data(color.range())
+                .enter()
+                .append('rect')
+                .attr('width',11)
+                .attr('height',11)
+                .attr('x',function(d,i){ return legendX + i*13; })
+                .attr('y',legendY)
+                //.attr('title',function(d,i) {console.log(d,i);return "";})
+                .attr('fill',function(d){ return d; });
+
+            svgLegend.append('text')
+                .attr('class','label-legend')
+                .attr("fill", "#000")
+                .attr('x', legendX - 35)
+                .attr('y',legendY + 10)
+                .text(labels.legend[0]);
+
+            svgLegend.append('text')
+                .attr('class','label-legend')
+                .attr("fill", "#000")
+                .attr('x', legendX + color.range().length*13+5)
+                .attr('y',legendY + 10)
+                .text(labels.legend[1]);
+        }
 
     }
 
