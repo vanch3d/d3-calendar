@@ -8,6 +8,7 @@
         "sourceType": "module"
     },
     "rules": {
+        "no-console": "warn",
         "no-undef": "warn",
         "no-unused-vars": "warn",
         "accessor-pairs": "error",
