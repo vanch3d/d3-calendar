@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendar</title>
+
+</head>
+<body>
+
+<div id="controller" style="width: 100%;"></div>
+<div id="charts" class="container">
+    <div class="row">
+        <div class="col">First series
+            <div class="calendar" data-max="2" id="chart1"></div></div>
+        <div class="col">Second series
+            <div class="calendar" data-max="4" id="chart2"></div></div>
+        <div class="w-100"></div>
+        <div class="col">Last series
+            <div class="calendar" data-max="7" id="chart3"></div></div>
+    </div>
+    <div class="row">
+        <div id="legend"></div>
+    </div>
+</div>
+
+
+</body>
+<script src="../node_modules/d3v4/build/d3.min.js"></script>
+<script src="../dist/d3-calendar.js"></script>
+<script>
+    (function () {
+        // generate a set of random values and nest it by date
+        let formatYear = d3.timeFormat("%Y-%m-%d");
+
+        // generate random data from a max value specified with the element
+        function generateData(max){
+            max = +max || 5;
+            let byDay = d3.nest()
+                .key(function (d) { return formatYear(d); })
+                .rollup(function () {
+                    return Math.round(d3.randomUniform(0,max)()) || NaN;
+                })
+                .object(d3.timeDays(new Date(2018,0,1),new Date()) );
+            console.log("byDay: ",byDay);
+            return byDay;
+        }
+
+        // change the chart's color scale
+        let color = d3.scaleQuantize()
+            .domain([0, 5])
+            .range(["#a50026", "#f46d43", "#fee08b", "#d9ef8b", "#66bd63", "#006837"]);
+
+        // define the calendar chart
+        let chart = d3.calendar()
+            .color(color)
+            .weeklySummary(true)
+            .mondayWeek(true);
+
+        // create several visualisation in a multi-elements selection
+        // All views are created from the same calendar chart, sharing color scale and other
+        // configurations but from different data streams
+        d3.selectAll('div.calendar')
+            .datum(function(d,i) {
+                let elt = document.getElementById("chart"+(i+1));
+                let max = parseInt(elt.dataset.max);
+                return generateData(max);
+            })
+            .call(chart);
+    })();
+</script>
+</html>

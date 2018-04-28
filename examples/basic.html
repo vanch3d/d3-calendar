@@ -16,7 +16,7 @@
 
 </body>
 <script src="../node_modules/d3v4/build/d3.min.js"></script>
-<script src="../dist/d3-calendar.min.js"></script>
+<script src="../dist/d3-calendar.js"></script>
 <script>
     (function () {
         // generate a set of random values and nest it by date
@@ -40,11 +40,10 @@
             .weeklySummary(true)
             .mondayWeek(true);
 
-        // generate the chart from the dataset in the selected element
+        // create the chart from the dataset in the selected element
         d3.select('#chart')
             .datum(byDay)
             .call(chart);
-
     })();
 </script>
 </html>
