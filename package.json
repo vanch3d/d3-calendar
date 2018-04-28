@@ -1,6 +1,6 @@
 {
   "name": "d3-calendar",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A d3-module implementation of the heatmap calendar",
   "keywords": [
     "d3",
