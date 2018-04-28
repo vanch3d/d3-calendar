@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendar</title>
+</head>
+<body>
+
+<div id="controller" style="width: 100%;margin-bottom: 20px;">
+</div>
+<div id="chart" style="width: 100%;">
+</div>
+<div id="legend"></div>
+
+
+</body>
+<script src="../node_modules/d3v4/build/d3.min.js"></script>
+<script src="../dist/d3-calendar.js"></script>
+<script>
+    (function () {
+
+        // generate a set of random values and nest it by date
+        let formatYear = d3.timeFormat("%Y-%m-%d");
+        let byDay = d3.nest()
+            .key(function (d) { return formatYear(d); })
+            .rollup(function () {
+                // create three different results (rollups) in the nesting
+                return {
+                    test1: Math.round(d3.randomUniform(0,5)()) || NaN,
+                    test2: Math.round(d3.randomUniform(0,5)()) || NaN,
+                    test3: Math.round(d3.randomUniform(0,5)()) || NaN,
+                };
+            })
+            .object(d3.timeDays(new Date(2018,0,1),new Date()) );
+
+        // change the chart's color scale
+        let color = d3.scaleQuantize()
+            .domain([0, 5])
+            .range(["#a50026", "#f46d43", "#fee08b", "#d9ef8b", "#66bd63", "#006837"]);
+
+        // define the calendar chart
+        let chart = d3.calendar()
+            .color(color)
+            .weeklySummary(true)
+            .mondayWeek(true);
+
+        // generate the chart from the dataset in the selected element
+        d3.select('#chart')
+            .datum(byDay)
+            .call(chart);
+
+        // create the switch control based on the rollup keys from the nesting
+        let switches = chart.rollupKeys();
+        switches.forEach(function(d){
+            let btn = document.createElement("BUTTON"),
+                t = document.createTextNode(`Show '${d}'`);
+            btn.appendChild(t);
+            btn.onclick = function() {
+                console.log("showing stream '" + d + "'");
+                // on click, update the chart with the data from the given rollup
+                chart.dispatchUpdate(d);
+            };
+            document.getElementById("controller").appendChild(btn);
+        });
+
+    })();
+</script>
+</html>
