@@ -219,7 +219,9 @@ export default function() {
                     .attr("height", cellSize)
                     .attr("class","rect-week")
                     .attr("x", function(d) { return d.week * cellSize; })
-                    .attr("y", function() { return 7 * cellSize + summaryMargin; });
+                    .attr("y", function() { return 7 * cellSize + summaryMargin; })
+                    .append("title")
+                    .text(function() { return null; });
             }
 
             // create a group for each month in the calendar
@@ -361,14 +363,9 @@ export default function() {
         svgChart.selectAll(".rect-week")
             .filter(function(d) {
                 return d.data; })
-            .attr("fill", function(d) {
-                //let y = new Date(d).getFullYear(),
-                //    w = getWeek(d);
-                return color(_getData(d.data,key));})
-            .append("title")
+            .attr("fill", function(d) { return color(_getData(d.data,key));})
+            .selectAll("title")
             .text(function(d) {
-                //let y = new Date(d).getFullYear(),
-                //   w = getWeek(d);
                 return "Week " + d.week + ": " + _getData(d.data,key).toFixed(2);
             });
     }
